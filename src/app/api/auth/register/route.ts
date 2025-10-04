@@ -1,5 +1,5 @@
 import { hashPassword } from "@/lib/auth";
-import crypto from 'crypto';
+import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,13 +26,21 @@ export async function POST(request: NextRequest) {
   }
 
   const hashedPassword = await hashPassword(password);
-  const saltBase64 = crypto.randomBytes(16).toString('base64');
-  const newUser = new User({ email, password: hashedPassword, salt: saltBase64 });
+  const saltBase64 = crypto.randomBytes(16).toString("base64");
+  const newUser = new User({
+    email,
+    password: hashedPassword,
+    salt: saltBase64,
+  });
 
   await newUser.save();
 
   return NextResponse.json(
-    { message: "User registered successfully", user: { email: newUser.email }, salt: saltBase64 },
+    {
+      message: "User registered successfully",
+      user: { email: newUser.email },
+      salt: saltBase64,
+    },
     { status: 201 }
   );
 }
