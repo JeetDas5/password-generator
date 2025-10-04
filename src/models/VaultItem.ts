@@ -22,7 +22,7 @@ const FieldSchema: Schema = new Schema<EncryptedField>({
 const VaultItemSchema: Schema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    title: FieldSchema,
+    title: { type: String, required: true },
     username: FieldSchema,
     password: FieldSchema,
     url: FieldSchema,

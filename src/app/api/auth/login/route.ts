@@ -2,6 +2,8 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { generateToken, verifyPassword } from "@/lib/auth";
+import crypto from 'crypto';
+import { IUser } from "@/models/User";
 
 export async function POST(request: NextRequest) {
   await connectDB();
@@ -27,15 +29,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid password" }, { status: 401 });
   }
 
-  const token = generateToken(user);
+  const token = await generateToken(user);
   if(!token) {
     return NextResponse.json({ message: "Token generation failed" }, { status: 500 });
   }
 
-  console.log("Generated Token:", token);
+  // Ensure user has a salt; if not, generate and persist one
+  const userDoc = user as unknown as IUser;
+  let saltBase64 = userDoc.salt;
+  if (!saltBase64) {
+    saltBase64 = crypto.randomBytes(16).toString('base64');
+    userDoc.salt = saltBase64;
+    await userDoc.save();
+  }
 
   return NextResponse.json(
-    { message: "Login successful", user: { email: user.email }, token },
+    { message: "Login successful", user: { email: user.email }, token, salt: saltBase64 },
     { status: 200 }
   );
 }
