@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -42,6 +41,7 @@ export default function FolderManager({
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
+  const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     color: "#3B82F6",
@@ -132,13 +132,6 @@ export default function FolderManager({
   };
 
   const handleDeleteFolder = async (folderId: string) => {
-    if (
-      !confirm(
-        "Are you sure? Items in this folder will be moved to 'No Folder'."
-      )
-    )
-      return;
-
     try {
       await axios.delete(`/api/folders/${folderId}`, {
         headers: {
@@ -159,6 +152,15 @@ export default function FolderManager({
         console.error("Delete folder error:", error.message);
       }
     }
+  };
+
+  const cancelDelete = () => setFolderToDelete(null);
+
+  const confirmDelete = async () => {
+    if (!folderToDelete) return;
+    const id = folderToDelete._id;
+    setFolderToDelete(null);
+    await handleDeleteFolder(id);
   };
 
   const openEditModal = (folder: Folder) => {
@@ -186,9 +188,7 @@ export default function FolderManager({
 
   return (
     <div className="space-y-4">
-   
       <div className="space-y-2">
-  
         <button
           onClick={() => onFolderSelect?.(null)}
           className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
@@ -199,9 +199,6 @@ export default function FolderManager({
         >
           <span className="text-xl">📋</span>
           <span className="font-medium">All Items</span>
-          <span className="ml-auto text-sm text-gray-500">
-            {folders.reduce((sum, f) => sum + (f as any).itemCount || 0, 0)}
-          </span>
         </button>
 
         {folders.map((folder) => (
@@ -248,7 +245,7 @@ export default function FolderManager({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteFolder(folder._id);
+                  setFolderToDelete(folder);
                 }}
                 className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
                 title="Delete folder"
@@ -373,6 +370,36 @@ export default function FolderManager({
                   {editingFolder ? "Update" : "Create"} Folder
                 </Button>
                 <Button variant="secondary" onClick={closeModal}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {folderToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Delete Folder
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Are you sure you want to delete the folder &quot;
+                {folderToDelete.name}&quot;? Items in this folder will be moved
+                to &quot;No Folder&quot; and this action cannot be undone.
+              </p>
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={confirmDelete}
+                  className="flex-1"
+                  variant="danger"
+                >
+                  Delete
+                </Button>
+                <Button variant="secondary" onClick={cancelDelete}>
                   Cancel
                 </Button>
               </div>

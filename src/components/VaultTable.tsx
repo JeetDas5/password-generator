@@ -52,6 +52,7 @@ const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(
     const [editingItem, setEditingItem] = useState<DecryptedVaultItem | null>(
       null
     );
+    const [itemToDelete, setItemToDelete] = useState<DecryptedVaultItem | null>(null);
     const [editForm, setEditForm] = useState({
       title: "",
       username: "",
@@ -230,8 +231,6 @@ const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(
     };
 
     const handleDelete = async (id: string) => {
-      if (!confirm("Are you sure you want to delete this item?")) return;
-
       try {
         await axios.delete(`/api/vault/delete/${id}`, {
           headers: {
@@ -249,6 +248,15 @@ const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(
         }
         toast.error("Failed to delete item");
       }
+    };
+
+    const cancelDelete = () => setItemToDelete(null);
+
+    const confirmDelete = async () => {
+      if (!itemToDelete) return;
+      const id = itemToDelete._id;
+      setItemToDelete(null);
+      await handleDelete(id);
     };
 
     return (
@@ -592,7 +600,7 @@ const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => setItemToDelete(item)}
                           className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-sm transition-colors"
                           title="Delete item"
                         >
@@ -618,6 +626,22 @@ const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(
             </table>
           </div>
         </div>
+
+        {itemToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700">
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Item</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Are you sure you want to delete &quot;{typeof itemToDelete.title === 'string' ? itemToDelete.title : ''}&quot;? This action cannot be undone.</p>
+
+                <div className="flex gap-3 mt-6">
+                  <button onClick={confirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">Delete</button>
+                  <button onClick={cancelDelete} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {filteredItems.length === 0 && items.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
