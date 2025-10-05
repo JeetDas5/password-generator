@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
   }
   const userId = payload.id;
-  const vaultItems = await VaultItem.find({ userId });
+  const vaultItems = await VaultItem.find({ userId }).populate('folderId');
   return NextResponse.json(
     {
       message: "Vault items fetched successfully",

@@ -6,10 +6,13 @@ import { useVaultKey } from "@/context/VaultKeyContext";
 import VaultItemForm from "@/components/VaultItemForm";
 import VaultTable from "@/components/VaultTable";
 import VaultKeyPrompt from "@/components/VaultKeyPrompt";
+import FolderManager from "@/components/FolderManager";
+import ExportImport from "@/components/ExportImport";
 
 export default function DashboardPage() {
   const vaultTableRef = useRef<{ refreshItems: () => void }>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const { key } = useVaultKey();
   const router = useRouter();
 
@@ -56,17 +59,43 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Add New Item Form */}
-          <div className="xl:col-span-1">
-            <div className="sticky top-8">
-              <VaultItemForm onItemCreated={handleItemCreated} />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 space-y-6">
+              {/* Folder Manager */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  📁 Folders
+                </h3>
+                <FolderManager 
+                  onFolderSelect={setSelectedFolderId}
+                  selectedFolderId={selectedFolderId}
+                />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  ⚡ Quick Actions
+                </h3>
+                <div className="space-y-2">
+                  <ExportImport onImportComplete={handleItemCreated} />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Vault Items Table */}
-          <div className="xl:col-span-2">
-            <VaultTable ref={vaultTableRef} />
+          {/* Main Content Area */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Add New Item Form */}
+            <VaultItemForm onItemCreated={handleItemCreated} />
+
+            {/* Vault Items Table */}
+            <VaultTable 
+              ref={vaultTableRef} 
+              selectedFolderId={selectedFolderId}
+            />
           </div>
         </div>
       </div>

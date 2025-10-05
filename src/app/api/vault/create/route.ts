@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   await connectDB();
 
   const body = await request.json();
-  const { title, username, password, url, notes } = body;
+  const { title, username, password, url, notes, tags, folderId, favorite } = body;
 
   if (!title || !username || !password) {
     return NextResponse.json(
@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
     password,
     url,
     notes,
+    tags: tags || [],
+    folderId: folderId && folderId !== "" ? folderId : null,
+    favorite: favorite || false,
   });
   if (!newVaultItem) {
     return NextResponse.json(

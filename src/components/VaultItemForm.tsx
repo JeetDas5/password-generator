@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useVaultKey } from "@/context/VaultKeyContext";
 import { encryptVaultItemFields } from "@/lib/crypto";
 import toast from "react-hot-toast";
@@ -16,9 +16,31 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
   const [password, setPassword] = useState("");
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [folderId, setFolderId] = useState<string>("");
+  const [favorite, setFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [folders, setFolders] = useState<any[]>([]);
+  const [newTag, setNewTag] = useState("");
   const { key } = useVaultKey();
+
+  useEffect(() => {
+    fetchFolders();
+  }, []);
+
+  const fetchFolders = async () => {
+    try {
+      const response = await axios.get("/api/folders", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      setFolders(response.data.folders);
+    } catch (error) {
+      console.error("Failed to fetch folders");
+    }
+  };
 
   const clearForm = () => {
     setTitle("");
@@ -26,6 +48,10 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
     setPassword("");
     setUrl("");
     setNotes("");
+    setTags([]);
+    setFolderId("");
+    setFavorite(false);
+    setNewTag("");
   };
 
   const generatePassword = () => {
@@ -64,6 +90,9 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
       const res = await axios.post("/api/vault/create", {
         title,
         ...encryptedFields,
+        tags,
+        folderId: folderId && folderId !== "" ? folderId : null,
+        favorite,
       }, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -191,6 +220,98 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
             onChange={(e) => setNotes(e.target.value)}
             disabled={isLoading}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Folder
+          </label>
+          <select
+            className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+            value={folderId}
+            onChange={(e) => setFolderId(e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="">No Folder</option>
+            {folders.map((folder) => (
+              <option key={folder._id} value={folder._id}>
+                {folder.icon} {folder.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Tags
+          </label>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Add a tag..."
+                className="flex-1 border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (newTag.trim() && !tags.includes(newTag.trim())) {
+                      setTags([...tags, newTag.trim()]);
+                      setNewTag("");
+                    }
+                  }
+                }}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newTag.trim() && !tags.includes(newTag.trim())) {
+                    setTags([...tags, newTag.trim()]);
+                    setNewTag("");
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors"
+                disabled={isLoading || !newTag.trim()}
+              >
+                Add
+              </button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-md text-sm"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setTags(tags.filter((_, i) => i !== index))}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="favorite"
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            checked={favorite}
+            onChange={(e) => setFavorite(e.target.checked)}
+            disabled={isLoading}
+          />
+          <label htmlFor="favorite" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            ⭐ Mark as favorite
+          </label>
         </div>
 
         <div className="flex gap-3 pt-2">

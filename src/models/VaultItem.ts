@@ -12,6 +12,9 @@ export interface IVaultItem extends Document {
   password: EncryptedField;
   url?: EncryptedField;
   notes?: EncryptedField;
+  tags: string[];
+  folderId?: string;
+  favorite: boolean;
 }
 
 const FieldSchema: Schema = new Schema<EncryptedField>({
@@ -27,6 +30,9 @@ const VaultItemSchema: Schema = new Schema(
     password: FieldSchema,
     url: FieldSchema,
     notes: FieldSchema,
+    tags: [{ type: String }],
+    folderId: { type: Schema.Types.ObjectId, ref: "Folder", required: false },
+    favorite: { type: Boolean, default: false },
   },
   {
     timestamps: true,

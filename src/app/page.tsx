@@ -1,12 +1,20 @@
-
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthForm from "@/components/AuthForm";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        router.replace("/dashboard");
+      }
+    } catch {}
+  }, [router]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center px-4 py-12">
@@ -17,35 +25,45 @@ export default function HomePage() {
           <span className="text-blue-600 dark:text-blue-400"> Secured</span>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-          End-to-end encrypted password manager that keeps your digital life safe and organized.
+          End-to-end encrypted password manager that keeps your digital life
+          safe and organized.
         </p>
-        
+
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="text-center">
             <div className="text-3xl mb-2">🔒</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">End-to-End Encrypted</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Your data is encrypted before it leaves your device</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              End-to-End Encrypted
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Your data is encrypted before it leaves your device
+            </p>
           </div>
           <div className="text-center">
             <div className="text-3xl mb-2">⚡</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Lightning Fast</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Quick access to all your passwords and secure notes</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              Lightning Fast
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Quick access to all your passwords and secure notes
+            </p>
           </div>
           <div className="text-center">
             <div className="text-3xl mb-2">🌐</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Cross-Platform</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Access your vault from anywhere, anytime</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              Cross-Platform
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Access your vault from anywhere, anytime
+            </p>
           </div>
         </div>
       </div>
 
       {/* Auth Form */}
-      <AuthForm
-        type={mode}
-        onSuccess={() => router.push("/dashboard")}
-      />
-      
+      <AuthForm type={mode} onSuccess={() => router.push("/dashboard")} />
+
       {/* Toggle Auth Mode */}
       <button
         onClick={() => setMode(mode === "login" ? "register" : "login")}

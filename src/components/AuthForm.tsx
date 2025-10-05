@@ -14,6 +14,8 @@ export default function AuthForm({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [requires2FA, setRequires2FA] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { derive } = useVaultKey();
 
@@ -22,10 +24,21 @@ export default function AuthForm({
     setIsLoading(true);
 
     try {
-      const res = await axios.post(`/api/auth/${type}`, { email, password });
+      const res = await axios.post(`/api/auth/${type}`, { 
+        email, 
+        password,
+        ...(requires2FA && { twoFactorCode })
+      });
 
       if (![200, 201].includes(res.status)) {
         toast.error(res.data.message || `${type} failed`);
+        return;
+      }
+
+      // Check if 2FA is required
+      if (res.data.requires2FA && !requires2FA) {
+        setRequires2FA(true);
+        toast.success("Please enter your 2FA code");
         return;
       }
 
@@ -103,6 +116,28 @@ export default function AuthForm({
               disabled={isLoading}
             />
           </div>
+
+          {requires2FA && (
+            <div>
+              <label htmlFor="twoFactorCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Two-Factor Authentication Code
+              </label>
+              <input
+                id="twoFactorCode"
+                type="text"
+                placeholder="Enter 6-digit code"
+                maxLength={6}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-center font-mono"
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
+                required
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Enter the code from your authenticator app or use a backup code
+              </p>
+            </div>
+          )}
 
           <button 
             type="submit" 

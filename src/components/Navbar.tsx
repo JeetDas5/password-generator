@@ -49,6 +49,16 @@ export default function Navbar() {
                   >
                     Dashboard
                   </button>
+                  <button
+                    onClick={() => router.push("/settings")}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      pathname === "/settings"
+                        ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    Settings
+                  </button>
                 </>
               )}
             </div>

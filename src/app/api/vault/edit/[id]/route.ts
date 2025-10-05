@@ -29,7 +29,7 @@ export async function PUT(
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
 
     const body = await req.json();
-    const { title, username, password, url, notes } = body;
+    const { title, username, password, url, notes, tags, folderId, favorite } = body;
 
     if (!title || !username || !password) {
       return NextResponse.json(
@@ -43,7 +43,16 @@ export async function PUT(
     // Update vault entry
     const updated = await VaultItem.findOneAndUpdate(
       { _id: id, userId: decoded.id },
-      { title, username, password, url, notes },
+      { 
+        title, 
+        username, 
+        password, 
+        url, 
+        notes, 
+        tags: tags || [],
+        folderId: folderId && folderId !== "" ? folderId : null,
+        favorite: favorite || false
+      },
       { new: true }
     );
 

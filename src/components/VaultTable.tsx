@@ -13,6 +13,9 @@ type VaultItem = {
   password?: { ciphertext: string; iv: number[] };
   url?: { ciphertext: string; iv: number[] };
   notes?: { ciphertext: string; iv: number[] };
+  tags: string[];
+  folderId?: string;
+  favorite: boolean;
 };
 
 type EncryptedField = { ciphertext: string; iv: number[] };
@@ -24,9 +27,16 @@ type DecryptedVaultItem = {
   password?: string | EncryptedField | null;
   url?: string | EncryptedField | null;
   notes?: string | EncryptedField | null;
+  tags: string[];
+  folderId?: string;
+  favorite: boolean;
 };
 
-const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
+interface VaultTableProps {
+  selectedFolderId?: string | null;
+}
+
+const VaultTable = forwardRef<{ refreshItems: () => void }, VaultTableProps>(({ selectedFolderId }, ref) => {
   const [items, setItems] = useState<DecryptedVaultItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<DecryptedVaultItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,7 +68,31 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
       data.map(async (item) => {
         try {
           const fields = await decryptVaultItemFields(key, item);
-          return { ...item, ...fields };
+
+          // Normalize folderId: the API may return an ObjectId (string) or a populated Folder object.
+          let folderIdStr: string | undefined = undefined;
+          if (item.folderId) {
+            if (typeof item.folderId === "string") {
+              folderIdStr = item.folderId;
+            } else if (typeof item.folderId === "object") {
+              // typed fallback for populated folder document
+              const anyFolder = item.folderId as {
+                _id?: { toString: () => string } | string;
+                toString?: () => string;
+              };
+              if (anyFolder._id) {
+                folderIdStr = typeof anyFolder._id === "string" ? anyFolder._id : anyFolder._id.toString();
+              } else if (typeof anyFolder.toString === "function") {
+                folderIdStr = anyFolder.toString();
+              }
+            }
+          }
+
+          return {
+            ...item,
+            ...fields,
+            folderId: folderIdStr,
+          };
         } catch (err) {
           console.error(
             `Failed to decrypt vault item ${item._id}:`,
@@ -86,12 +120,22 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
     refreshItems: fetchItems,
   }));
 
-  // Filter items based on search term
+  // Filter items based on search term and folder
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredItems(items);
-    } else {
-      const filtered = items.filter((item) => {
+    let filtered = items;
+
+    // Filter by folder
+    if (selectedFolderId !== null) {
+      filtered = filtered.filter((item) => {
+        // Handle both string and ObjectId comparisons
+        const itemFolderId = item.folderId?.toString() || null;
+        return itemFolderId === selectedFolderId;
+      });
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter((item) => {
         const title = typeof item.title === "string" ? item.title.toLowerCase() : "";
         const username = typeof item.username === "string" ? item.username.toLowerCase() : "";
         const url = typeof item.url === "string" ? item.url.toLowerCase() : "";
@@ -104,9 +148,10 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
           notes.includes(searchTerm.toLowerCase())
         );
       });
-      setFilteredItems(filtered);
     }
-  }, [items, searchTerm]);
+
+    setFilteredItems(filtered);
+  }, [items, searchTerm, selectedFolderId]);
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
@@ -298,7 +343,7 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
                 <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Username</th>
                 <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Password</th>
                 <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">URL</th>
-                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Notes</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Tags</th>
                 <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
@@ -306,8 +351,11 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
               {filteredItems.map((item) => (
                 <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <td className="p-4">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {typeof item.title === "string" ? item.title : ""}
+                    <div className="flex items-center gap-2">
+                      {item.favorite && <span className="text-yellow-500">⭐</span>}
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {typeof item.title === "string" ? item.title : ""}
+                      </div>
                     </div>
                   </td>
                   <td className="p-4">
@@ -378,20 +426,18 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[120px] text-gray-600 dark:text-gray-400">
-                        {typeof item.notes === "string" ? item.notes : ""}
-                      </span>
-                      {typeof item.notes === "string" && item.notes && (
-                        <button
-                          onClick={() => copyToClipboard(item.notes as string, "Notes")}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                          title="Copy notes"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
+                    <div className="flex flex-wrap gap-1">
+                      {item.tags && item.tags.length > 0 ? (
+                        item.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                          >
+                            {tag}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 text-sm">No tags</span>
                       )}
                     </div>
                   </td>
