@@ -60,3 +60,9 @@ body {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+@layer base{
+  button{
+    @apply cursor-pointer;
+  }
+}

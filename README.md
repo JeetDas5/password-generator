@@ -84,6 +84,17 @@ This project uses MongoDB via `mongoose`. Point `MONGO_URI` at a writable databa
 - Common utilities are in `src/lib` (auth, crypto, db helpers).
 
 
+## Cryptography
+
+This project uses a mix of well-established primitives and libraries:
+
+- Client-side encryption: Web Crypto API (see `src/lib/crypto.ts`) — vault fields are encrypted with AES-GCM (256-bit) using a key derived from the user's vault password via PBKDF2 (SHA-256, 100000 iterations). IVs are 12 bytes and salts are 16 bytes. AES-GCM provides authenticated encryption (confidentiality + integrity), and PBKDF2 with many iterations helps slow down brute-force attacks.
+- Server-side password hashing: `bcrypt` — used for hashing user account passwords before storing in the database (bcrypt is slow by design and well-tested for password hashing).
+- Authentication: JSON Web Tokens (`jsonwebtoken`) for stateless session tokens; keep `JWT_SECRET` safe and rotate if compromised.
+- Two-factor authentication: `speakeasy` (TOTP) + `qrcode` for provisioning — a standard, interoperable approach for 2FA.
+
+Security notes: never store raw passwords or unencrypted vault fields on the server. Keep secrets out of source control (use `.env.local`). The `src/lib/crypto.ts` implementation intentionally performs encryption/decryption in the client using the derived key so the server only stores ciphertext.
+
 ## Contributing
 
 Contributions are welcome. Open issues or PRs on the repository. Keep changes small and provide clear commit messages.
