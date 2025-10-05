@@ -15,7 +15,6 @@ export default function VaultKeyPrompt() {
     setLoading(true);
 
     try {
-      // Verify password and get salt from the server
       const res = await axios.post(
         "/api/auth/verify-password",
         { password },
@@ -34,7 +33,6 @@ export default function VaultKeyPrompt() {
 
       const { salt } = res.data;
 
-      // Derive the vault key (we know the password is correct now)
       await derive(password, salt);
       setPassword(""); // Clear password from memory
       toast.success("Vault unlocked!");

@@ -14,10 +14,12 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+    };
+
     const { password } = await request.json();
-    
+
     const user = await User.findById(decoded.id);
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -26,7 +28,10 @@ export async function POST(request: NextRequest) {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return NextResponse.json({ message: "Invalid password" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid password" },
+        { status: 401 }
+      );
     }
 
     // Disable 2FA
@@ -38,6 +43,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "2FA disabled successfully" });
   } catch (error) {
     console.error("2FA disable error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -17,8 +17,10 @@ export function VaultKeyProvider({ children }: { children: React.ReactNode }) {
   const [key, setKey] = useState<CryptoKey | null>(null);
 
   const derive = async (password: string, saltBase64: string) => {
-    if (typeof saltBase64 !== 'string' || saltBase64.length === 0) {
-      throw new Error(`derive expected a base64 salt string but got: ${String(saltBase64)}`);
+    if (typeof saltBase64 !== "string" || saltBase64.length === 0) {
+      throw new Error(
+        `derive expected a base64 salt string but got: ${String(saltBase64)}`
+      );
     }
     const salt = base64ToSalt(saltBase64);
     const derivedKey = await deriveKeyFromPassword(password, salt);

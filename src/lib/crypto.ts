@@ -143,8 +143,6 @@ export async function decryptString(
     );
     return dec.decode(plainBuffer);
   } catch (err) {
-    // WebCrypto throws OperationError for decryption failures (bad key/iv/ciphertext)
-    // Log a concise message and return null so caller can handle missing field
     console.error('decryptString failed:', err instanceof Error ? err.message : String(err));
     return null;
   }

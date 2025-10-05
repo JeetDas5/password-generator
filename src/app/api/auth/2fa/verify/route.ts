@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       secret: user.twoFactorSecret,
       encoding: "base32",
       token: code,
-      window: 2, // Allow 2 time steps before/after
+      window: 2,
     });
 
     if (!verified) {

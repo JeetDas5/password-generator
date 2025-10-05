@@ -27,18 +27,25 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/vault/export", {
-        exportPassword,
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      const response = await axios.post(
+        "/api/vault/export",
+        {
+          exportPassword,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
 
       // Create and download the file
-      const blob = new Blob([JSON.stringify(response.data.exportData, null, 2)], {
-        type: "application/json",
-      });
+      const blob = new Blob(
+        [JSON.stringify(response.data.exportData, null, 2)],
+        {
+          type: "application/json",
+        }
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -53,6 +60,11 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
       setShowModal(false);
     } catch (error) {
       toast.error("Failed to export vault");
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Export error response:", error.response.data);
+      } else if (error instanceof Error) {
+        console.error("Export error:", error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -69,15 +81,19 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
       const fileContent = await importFile.text();
       const encryptedData = JSON.parse(fileContent);
 
-      const response = await axios.post("/api/vault/import", {
-        encryptedData,
-        importPassword,
-        mergeMode: true,
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      const response = await axios.post(
+        "/api/vault/import",
+        {
+          encryptedData,
+          importPassword,
+          mergeMode: true,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
 
       toast.success(
         `Import completed! ${response.data.imported.folders} folders and ${response.data.imported.items} items imported.`
@@ -86,12 +102,19 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
       setImportFile(null);
       setShowModal(false);
       onImportComplete?.();
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        toast.error(error.response.data.message || "Invalid import file or password");
-      } else {
-        toast.error("Failed to import vault");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 400) {
+          toast.error(
+            error.response.data.message || "Invalid import file or password"
+          );
+        } else {
+          console.error("Import error response:", error.response.data);
+        }
+      } else if (error instanceof Error) {
+        console.error("Import error:", error.message);
       }
+      toast.error("Failed to import vault");
     } finally {
       setLoading(false);
     }
@@ -116,8 +139,18 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
         variant="ghost"
         className="w-full justify-start"
       >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
+        <svg
+          className="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
+          />
         </svg>
         Export / Import
       </Button>
@@ -134,13 +167,22 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                   onClick={() => setShowModal(false)}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
-              {/* Tabs */}
               <div className="flex mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                 <button
                   onClick={() => setActiveTab("export")}
@@ -171,8 +213,9 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                       Export Your Vault
                     </h4>
                     <p className="text-sm text-blue-800 dark:text-blue-400">
-                      Create an encrypted backup of all your passwords, folders, and settings. 
-                      The export will be protected with a password you choose.
+                      Create an encrypted backup of all your passwords, folders,
+                      and settings. The export will be protected with a password
+                      you choose.
                     </p>
                   </div>
 
@@ -188,7 +231,8 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                       onChange={(e) => setExportPassword(e.target.value)}
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Remember this password - you'll need it to import the file later
+                      Remember this password - you&apos;ll need it to import the file
+                      later
                     </p>
                   </div>
 
@@ -197,7 +241,9 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                     disabled={loading || !exportPassword}
                     className="w-full"
                   >
-                    {loading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                    {loading ? (
+                      <LoadingSpinner size="sm" className="mr-2" />
+                    ) : null}
                     📤 Export Vault
                   </Button>
                 </div>
@@ -208,7 +254,8 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                       Import Vault Data
                     </h4>
                     <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                      Import an encrypted vault export file. This will merge with your existing data.
+                      Import an encrypted vault export file. This will merge
+                      with your existing data.
                     </p>
                   </div>
 
@@ -252,7 +299,9 @@ export default function ExportImport({ onImportComplete }: ExportImportProps) {
                     disabled={loading || !importFile || !importPassword}
                     className="w-full"
                   >
-                    {loading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                    {loading ? (
+                      <LoadingSpinner size="sm" className="mr-2" />
+                    ) : null}
                     📥 Import Vault
                   </Button>
                 </div>

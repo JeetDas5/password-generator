@@ -18,7 +18,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center px-4 py-12">
-      {/* Hero Section */}
+
       <div className="text-center mb-12 max-w-2xl">
         <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Your Passwords,
@@ -29,7 +29,6 @@ export default function HomePage() {
           safe and organized.
         </p>
 
-        {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="text-center">
             <div className="text-3xl mb-2">🔒</div>
@@ -61,13 +60,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Auth Form */}
       <AuthForm type={mode} onSuccess={() => router.push("/dashboard")} />
 
-      {/* Toggle Auth Mode */}
       <button
         onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="mt-6 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+        className="mt-6 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors cursor-pointer"
       >
         {mode === "login"
           ? "Don't have an account? Create one"

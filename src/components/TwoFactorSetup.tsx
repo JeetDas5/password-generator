@@ -5,13 +5,17 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Button from "./ui/Button";
 import LoadingSpinner from "./ui/LoadingSpinner";
+import Image from "next/image";
 
 interface TwoFactorSetupProps {
   onComplete: () => void;
   onCancel: () => void;
 }
 
-export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
+export default function TwoFactorSetup({
+  onComplete,
+  onCancel,
+}: TwoFactorSetupProps) {
   const [step, setStep] = useState<"setup" | "verify">("setup");
   const [qrCode, setQrCode] = useState("");
   const [secret, setSecret] = useState("");
@@ -22,17 +26,26 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
   const handleSetup = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/2fa/setup", {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/auth/2fa/setup",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
 
       setQrCode(response.data.qrCode);
       setSecret(response.data.manualEntryKey);
       setStep("verify");
     } catch (error) {
       toast.error("Failed to setup 2FA");
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("2FA setup error response:", error.response.data);
+      } else if (error instanceof Error) {
+        console.error("2FA setup error:", error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -46,19 +59,28 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/2fa/verify", {
-        code: verificationCode,
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      const response = await axios.post(
+        "/api/auth/2fa/verify",
+        {
+          code: verificationCode,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
 
       setBackupCodes(response.data.backupCodes);
       toast.success("2FA enabled successfully!");
       onComplete();
     } catch (error) {
       toast.error("Invalid verification code");
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("2FA verify error response:", error.response.data);
+      } else if (error instanceof Error) {
+        console.error("2FA verify error:", error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -82,10 +104,12 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
             <div className="space-y-4 mb-6">
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
-                  What you'll need:
+                  What you&apos;ll need:
                 </h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-                  <li>• An authenticator app (Google Authenticator, Authy, etc.)</li>
+                  <li>
+                    • An authenticator app (Google Authenticator, Authy, etc.)
+                  </li>
                   <li>• Your smartphone or tablet</li>
                 </ul>
               </div>
@@ -125,24 +149,21 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
           </div>
 
           <div className="space-y-6">
-            {/* QR Code */}
             <div className="flex justify-center">
               <div className="bg-white p-4 rounded-lg">
-                <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                <Image src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
               </div>
             </div>
 
-            {/* Manual Entry */}
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Can't scan? Enter this code manually:
+                Can&apos;t scan? Enter this code manually:
               </p>
               <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded border font-mono break-all">
                 {secret}
               </code>
             </div>
 
-            {/* Verification */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Enter the 6-digit code from your app:
@@ -153,7 +174,9 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
                 maxLength={6}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center text-lg font-mono"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) =>
+                  setVerificationCode(e.target.value.replace(/\D/g, ""))
+                }
               />
             </div>
 
@@ -163,11 +186,15 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
                   Backup Codes
                 </h4>
                 <p className="text-sm text-yellow-800 dark:text-yellow-400 mb-3">
-                  Save these codes in a safe place. You can use them to access your account if you lose your device.
+                  Save these codes in a safe place. You can use them to access
+                  your account if you lose your device.
                 </p>
                 <div className="grid grid-cols-2 gap-2 font-mono text-sm">
                   {backupCodes.map((code, index) => (
-                    <div key={index} className="bg-white dark:bg-gray-800 p-2 rounded border">
+                    <div
+                      key={index}
+                      className="bg-white dark:bg-gray-800 p-2 rounded border"
+                    >
                       {code}
                     </div>
                   ))}

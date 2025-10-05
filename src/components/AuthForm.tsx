@@ -24,10 +24,10 @@ export default function AuthForm({
     setIsLoading(true);
 
     try {
-      const res = await axios.post(`/api/auth/${type}`, { 
-        email, 
+      const res = await axios.post(`/api/auth/${type}`, {
+        email,
         password,
-        ...(requires2FA && { twoFactorCode })
+        ...(requires2FA && { twoFactorCode }),
       });
 
       if (![200, 201].includes(res.status)) {
@@ -44,25 +44,33 @@ export default function AuthForm({
 
       const { token, salt } = res.data;
 
-      // Store token in localStorage (or cookie)
       if (token) localStorage.setItem("authToken", token);
 
       // Ensure salt was returned by the server
       if (typeof salt !== "string" || salt.length === 0) {
         console.error("Auth response missing salt:", res.data);
-        toast.error("Auth succeeded but vault salt is missing. Cannot derive vault key.");
+        toast.error(
+          "Auth succeeded but vault salt is missing. Cannot derive vault key."
+        );
         return;
       }
 
       // Derive and store vault key in memory
       await derive(password, salt);
 
-      toast.success(`${type === 'login' ? 'Login' : 'Registration'} successful!`);
+      toast.success(
+        `${type === "login" ? "Login" : "Registration"} successful!`
+      );
 
-      // Notify parent (e.g. home page) to redirect to dashboard
       onSuccess();
     } catch (error) {
-      toast.error(`${type} failed. Please try again.`);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        toast.error(error.response.data.message || "Invalid authentication code");
+      }
+      else if (error instanceof Error) {
+        console.error(`${type} error:`, error.message);
+        toast.error(`${type} failed. Please try again.`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -74,19 +82,21 @@ export default function AuthForm({
         <div className="text-center mb-8">
           <div className="text-4xl mb-4">🔐</div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {type === 'login' ? 'Welcome Back' : 'Create Account'}
+            {type === "login" ? "Welcome Back" : "Create Account"}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {type === 'login' 
-              ? 'Sign in to access your secure vault' 
-              : 'Join SecureVault to protect your passwords'
-            }
+            {type === "login"
+              ? "Sign in to access your secure vault"
+              : "Join SecureVault to protect your passwords"}
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Email Address
             </label>
             <input
@@ -102,7 +112,10 @@ export default function AuthForm({
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Password
             </label>
             <input
@@ -119,7 +132,10 @@ export default function AuthForm({
 
           {requires2FA && (
             <div>
-              <label htmlFor="twoFactorCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="twoFactorCode"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Two-Factor Authentication Code
               </label>
               <input
@@ -129,7 +145,9 @@ export default function AuthForm({
                 maxLength={6}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-center font-mono"
                 value={twoFactorCode}
-                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) =>
+                  setTwoFactorCode(e.target.value.replace(/\D/g, ""))
+                }
                 required
                 disabled={isLoading}
               />
@@ -139,21 +157,39 @@ export default function AuthForm({
             </div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Processing...
               </div>
+            ) : type === "login" ? (
+              "Sign In"
             ) : (
-              type === 'login' ? 'Sign In' : 'Create Account'
+              "Create Account"
             )}
           </button>
         </form>

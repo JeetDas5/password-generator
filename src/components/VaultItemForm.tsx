@@ -21,7 +21,13 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
   const [favorite, setFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [folders, setFolders] = useState<any[]>([]);
+  interface Folder {
+    _id: string;
+    name: string;
+    icon?: string;
+  }
+
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [newTag, setNewTag] = useState("");
   const { key } = useVaultKey();
 
@@ -38,7 +44,12 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
       });
       setFolders(response.data.folders);
     } catch (error) {
-      console.error("Failed to fetch folders");
+      if(axios.isAxiosError(error) && error.response) {
+        console.error("Error fetching folders:", error.response.data);
+      } else if (error instanceof Error) {
+        console.error("Error fetching folders:", error.message);
+      }
+      toast.error("Failed to load folders");
     }
   };
 
@@ -55,7 +66,8 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
   };
 
   const generatePassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
     const length = 16;
     let result = "";
     for (let i = 0; i < length; i++) {
@@ -87,22 +99,26 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
         notes,
       });
 
-      const res = await axios.post("/api/vault/create", {
-        title,
-        ...encryptedFields,
-        tags,
-        folderId: folderId && folderId !== "" ? folderId : null,
-        favorite,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      const res = await axios.post(
+        "/api/vault/create",
+        {
+          title,
+          ...encryptedFields,
+          tags,
+          folderId: folderId && folderId !== "" ? folderId : null,
+          favorite,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
         }
-      });
+      );
 
       if (res.status === 201) {
         toast.success("Item saved securely!");
         clearForm();
-        onItemCreated?.(); // Refresh the table
+        onItemCreated?.(); 
       } else {
         toast.error("Failed to save item");
       }
@@ -114,12 +130,14 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 z-[60]">
       <div className="flex items-center mb-6">
         <div className="text-2xl mr-3">➕</div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Item</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Add New Item
+        </h2>
       </div>
-      
+
       <form onSubmit={handleSave} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -171,13 +189,38 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
                 title={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
                   </svg>
                 )}
               </button>
@@ -288,7 +331,9 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
                     {tag}
                     <button
                       type="button"
-                      onClick={() => setTags(tags.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setTags(tags.filter((_, i) => i !== index))
+                      }
                       className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
                     >
                       ×
@@ -309,7 +354,10 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
             onChange={(e) => setFavorite(e.target.checked)}
             disabled={isLoading}
           />
-          <label htmlFor="favorite" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="favorite"
+            className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             ⭐ Mark as favorite
           </label>
         </div>
@@ -322,9 +370,25 @@ export default function VaultItemForm({ onItemCreated }: VaultItemFormProps) {
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Saving...
               </div>

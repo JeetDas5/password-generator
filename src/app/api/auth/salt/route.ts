@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
     const user = await User.findById(decoded.id);
-    
+
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
@@ -23,6 +23,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ salt: user.salt });
   } catch (error) {
     console.error("Salt retrieval error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -13,9 +13,13 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-    
-    const user = await User.findById(decoded.id).select("-password -twoFactorSecret -backupCodes");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+    };
+
+    const user = await User.findById(decoded.id).select(
+      "-password -twoFactorSecret -backupCodes"
+    );
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
@@ -26,6 +30,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Get user info error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

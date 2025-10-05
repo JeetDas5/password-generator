@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Check if it's a backup code
     if (user.backupCodes && user.backupCodes.includes(twoFactorCode.toUpperCase())) {
       // Remove used backup code
-      user.backupCodes = user.backupCodes.filter(code => code !== twoFactorCode.toUpperCase());
+      user.backupCodes = user.backupCodes.filter((code: string) => code !== twoFactorCode.toUpperCase());
       await user.save();
     } else {
       // Verify TOTP code
@@ -86,8 +86,6 @@ export async function POST(request: NextRequest) {
     { status: 200 }
   );
 
-  // Set HttpOnly cookie so middleware can read authentication server-side
-  // cookie will last 7 days
   res.cookies.set("authToken", token, {
     httpOnly: true,
     path: "/",
