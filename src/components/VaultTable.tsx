@@ -183,190 +183,237 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
   };
 
   return (
-    <div className="space-y-4 text-black">
+    <div className="space-y-6">
       {/* Search Bar */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search vault items..."
-          className="w-full p-2 border rounded-md text-white"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Search vault items..."
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
-            <h3 className="text-lg font-bold mb-4">Edit Vault Item</h3>
-            <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Title"
-                className="w-full p-2 border rounded"
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Username"
-                className="w-full p-2 border rounded"
-                value={editForm.username}
-                onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full p-2 border rounded"
-                value={editForm.password}
-                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="URL"
-                className="w-full p-2 border rounded"
-                value={editForm.url}
-                onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
-              />
-              <textarea
-                placeholder="Notes"
-                className="w-full p-2 border rounded"
-                value={editForm.notes}
-                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-              />
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={handleSaveEdit}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setEditingItem(null)}
-                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-              >
-                Cancel
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Vault Item</h3>
+                <button
+                  onClick={() => setEditingItem(null)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Title"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Username"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="URL"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  value={editForm.url}
+                  onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+                />
+                <textarea
+                  placeholder="Notes"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                  rows={3}
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                />
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setEditingItem(null)}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Vault Table */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold">Your Vault Items ({filteredItems.length})</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Vault Items</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+              </p>
+            </div>
+            <div className="text-2xl">🔐</div>
+          </div>
         </div>
+        
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b">
-                <th className="p-3 text-left font-medium text-gray-700">Title</th>
-                <th className="p-3 text-left font-medium text-gray-700">Username</th>
-                <th className="p-3 text-left font-medium text-gray-700">Password</th>
-                <th className="p-3 text-left font-medium text-gray-700">URL</th>
-                <th className="p-3 text-left font-medium text-gray-700">Notes</th>
-                <th className="p-3 text-left font-medium text-gray-700">Actions</th>
+              <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Title</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Username</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Password</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">URL</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Notes</th>
+                <th className="p-4 text-left font-medium text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.map((item) => (
-                <tr key={item._id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">
-                    {typeof item.title === "string" ? item.title : ""}
+                <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <td className="p-4">
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      {typeof item.title === "string" ? item.title : ""}
+                    </div>
                   </td>
-                  <td className="p-3">
+                  <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[100px]">
+                      <span className="truncate max-w-[120px] text-gray-700 dark:text-gray-300">
                         {typeof item.username === "string" ? item.username : ""}
                       </span>
                       {typeof item.username === "string" && item.username && (
                         <button
                           onClick={() => copyToClipboard(item.username as string, "Username")}
-                          className="text-blue-600 hover:text-blue-800 text-sm p-1 rounded hover:bg-blue-50"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                           title="Copy username"
                         >
-                          📋
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
                         </button>
                       )}
                     </div>
                   </td>
-                  <td className="p-3">
+                  <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-gray-600">
+                      <span className="font-mono text-gray-600 dark:text-gray-400">
                         {typeof item.password === "string" && item.password ? "••••••••" : ""}
                       </span>
                       {typeof item.password === "string" && item.password && (
                         <button
                           onClick={() => copyToClipboard(item.password as string, "Password")}
-                          className="text-blue-600 hover:text-blue-800 text-sm p-1 rounded hover:bg-blue-50"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                           title="Copy password"
                         >
-                          📋
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
                         </button>
                       )}
                     </div>
                   </td>
-                  <td className="p-3">
+                  <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[120px] text-blue-600">
+                      <span className="truncate max-w-[140px] text-blue-600 dark:text-blue-400">
                         {typeof item.url === "string" ? item.url : ""}
                       </span>
                       {typeof item.url === "string" && item.url && (
                         <>
                           <button
                             onClick={() => copyToClipboard(item.url as string, "URL")}
-                            className="text-blue-600 hover:text-blue-800 text-sm p-1 rounded hover:bg-blue-50"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                             title="Copy URL"
                           >
-                            📋
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
                           </button>
                           <a
                             href={item.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 hover:text-green-800 text-sm p-1 rounded hover:bg-green-50"
+                            className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 p-1 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                             title="Open URL"
                           >
-                            🔗
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
                           </a>
                         </>
                       )}
                     </div>
                   </td>
-                  <td className="p-3">
+                  <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[100px] text-gray-600">
+                      <span className="truncate max-w-[120px] text-gray-600 dark:text-gray-400">
                         {typeof item.notes === "string" ? item.notes : ""}
                       </span>
                       {typeof item.notes === "string" && item.notes && (
                         <button
                           onClick={() => copyToClipboard(item.notes as string, "Notes")}
-                          className="text-blue-600 hover:text-blue-800 text-sm p-1 rounded hover:bg-blue-50"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                           title="Copy notes"
                         >
-                          📋
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
                         </button>
                       )}
                     </div>
                   </td>
-                  <td className="p-3">
+                  <td className="p-4">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm transition-colors"
                         title="Edit item"
                       >
-                        ✏️
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700"
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-sm transition-colors"
                         title="Delete item"
                       >
-                        🗑️
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </div>
                   </td>
@@ -378,14 +425,22 @@ const VaultTable = forwardRef<{ refreshItems: () => void }>((props, ref) => {
       </div>
 
       {filteredItems.length === 0 && items.length > 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No items match your search criteria.
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div className="text-4xl mb-4">🔍</div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No matches found</h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            No items match your search criteria. Try a different search term.
+          </p>
         </div>
       )}
 
       {items.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No vault items found. Create your first item!
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div className="text-4xl mb-4">🔐</div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Your vault is empty</h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            Create your first password entry to get started with SecureVault.
+          </p>
         </div>
       )}
     </div>

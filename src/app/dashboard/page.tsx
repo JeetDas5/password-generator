@@ -27,7 +27,14 @@ export default function DashboardPage() {
   };
 
   if (!isAuthenticated) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading your vault...</p>
+        </div>
+      </div>
+    );
   }
 
   // Show vault key prompt if user is authenticated but vault key is missing
@@ -35,32 +42,34 @@ export default function DashboardPage() {
     return <VaultKeyPrompt />;
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    // Clear the vault key from memory for security
-    // Note: The key will be cleared when the component unmounts anyway
-    router.push("/");
-  };
-
   return (
-    <main className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Password Vault</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        >
-          Logout
-        </button>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <VaultItemForm onItemCreated={handleItemCreated} />
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Password Vault
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Manage your passwords and secure notes
+          </p>
         </div>
-        <div className="lg:col-span-2">
-          <VaultTable ref={vaultTableRef} />
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Add New Item Form */}
+          <div className="xl:col-span-1">
+            <div className="sticky top-8">
+              <VaultItemForm onItemCreated={handleItemCreated} />
+            </div>
+          </div>
+
+          {/* Vault Items Table */}
+          <div className="xl:col-span-2">
+            <VaultTable ref={vaultTableRef} />
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { VaultKeyProvider } from "@/context/VaultKeyContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { Toaster } from "react-hot-toast";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Password Manager",
-  description: "Securely manage your passwords",
+  title: "SecureVault - Password Manager",
+  description: "Securely manage your passwords with end-to-end encryption",
 };
 
 export default function RootLayout({
@@ -25,12 +27,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 min-h-screen`}
       >
-        <Toaster position="bottom-right"/>
-        <VaultKeyProvider>{children}</VaultKeyProvider>
+        <ThemeProvider>
+          <VaultKeyProvider>
+            <Navbar />
+            <main className="min-h-[calc(100vh-4rem)]">
+              {children}
+            </main>
+            <Toaster 
+              position="bottom-right"
+              toastOptions={{
+                className: 'dark:bg-gray-800 dark:text-white',
+              }}
+            />
+          </VaultKeyProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
