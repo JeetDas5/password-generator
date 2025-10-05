@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Password Generator
 
-## Getting Started
+A modern Next.js application for securely managing generated passwords and vault items. It includes user registration/login, encrypted vault storage, export/import features, and optional two-factor authentication (2FA).
 
-First, run the development server:
+This README explains how to run the project locally, what environment variables are required, and common development commands (PowerShell examples).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+- User registration and login (JWT-based)
+- Encrypted vault items (create, edit, delete, export/import)
+- 2FA setup and verification (TOTP)
+- MongoDB for persistence
+- Export to ZIP/JSON (client-side)
+
+## Tech stack
+
+- Next.js (app router)
+- React
+- MongoDB / Mongoose
+- TypeScript
+- Tailwind CSS
+- Axios, bcrypt, jsonwebtoken, speakeasy, qrcode
+
+## Requirements
+
+- Node.js (LTS recommended, e.g. Node 18+)
+- npm (comes with Node)
+- A running MongoDB instance (URI required in env)
+
+## Quick start (PowerShell)
+
+1. Install dependencies
+
+```powershell
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a `.env.local` file at the repository root and add the required environment variables (example below).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```powershell
+npm run dev
+```
 
-## Learn More
+Open http://localhost:3000 in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a `.env.local` with at least the following values (example):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+MONGO_URI=mongodb://localhost:27017/password-generator
+JWT_SECRET=your_jwt_secret_here
+# Optionally add other env variables needed by your deployment (e.g. NEXT_PUBLIC_BASE_URL)
+```
 
-## Deploy on Vercel
+Adjust values for production. Keep secrets out of source control.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## NPM scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `package.json` includes these scripts (use PowerShell or your preferred shell):
+
+- `npm run dev` — Start the Next.js dev server (uses Turbopack by default)
+- `npm run build` — Build the production app
+- `npm start` — Start the production server after build
+- `npm run lint` — Run ESLint
+
+Example (PowerShell):
+
+```powershell
+npm run build
+npm start
+```
+
+## Database
+
+This project uses MongoDB via `mongoose`. Point `MONGO_URI` at a writable database. For local development you can run MongoDB in a container or use a local install.
+
+## Development tips
+
+- Update frontend files under `src/app` and `src/components`.
+- Server routes (API) live in `src/app/api`.
+- Common utilities are in `src/lib` (auth, crypto, db helpers).
+
+
+## Contributing
+
+Contributions are welcome. Open issues or PRs on the repository. Keep changes small and provide clear commit messages.
+
+
